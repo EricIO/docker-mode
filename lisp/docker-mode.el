@@ -47,6 +47,7 @@
 ;;; Code:
 
 (require 'docker-images)
+(require 'docker-ps)
 
 (provide 'docker-mode)
 
