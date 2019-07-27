@@ -22,8 +22,14 @@
 ;;; Commentary:
 
 ;;; Code:
+(defvar docker-ps-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "k" 'docker-ps-kill-container)
+    map))
+
 (define-derived-mode docker-ps-mode tabulated-list-mode "Docker ps"
-  "Major mode for listing docker ps."
+  "Major mode for listing docker ps.
+\\{docker-ps-mode-map}"
   (setq tabulated-list-format [("CONTAINER ID" 15 t)
                                ("IMAGE"        15 t)
                                ("COMMAND"      20 t)
@@ -41,6 +47,13 @@
     (push (list nil (vconcat [] (split-string line "[[:blank:]]\\{2,\\}" t " ")))
           tabulated-list-entries))
   (tabulated-list-init-header))
+
+(defun docker-ps-kill-container ()
+  "Kill the container at point."
+  (interactive)
+  (let ((container-id (aref (tabulated-list-get-entry) 0)))
+    (process-lines "docker" "kill" container-id))
+  (revert-buffer))
 
 (defun docker-ps (&optional buffer)
   "Displays a list of all running docker containers.
