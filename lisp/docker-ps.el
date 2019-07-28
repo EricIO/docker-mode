@@ -61,7 +61,7 @@ Optinal argument BUFFER specifies a buffer to use instead
 of \"*Docker ps*\"."
   (interactive)
   (unless (bufferp buffer)
-    (setq buffer (get-buffer-create "*Docker PS*")))
+    (setq buffer (get-buffer-create "*docker ps*")))
   (with-current-buffer buffer
     (docker-ps-mode)
     (docker-ps--refresh)

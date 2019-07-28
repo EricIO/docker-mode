@@ -22,22 +22,33 @@
 ;;; Commentary:
 
 ;;; Code:
+(setq docker-images-mode-map
+      (let ((map (make-sparse-keymap)))
+        (define-key map "r" 'docker-images-run)
+        map))
+
 (define-derived-mode docker-images-mode tabulated-list-mode "Docker Images"
   "Major mode for listing docker images."
   (setq tabulated-list-format [("REPOSITORY" 15 t)
-			       ("TAG"        15 t)
-			       ("IMAGES ID"  15 t)
-			       ("CREATED"    15 t)
-			       ("SIZE"       15 t)])
+                               ("TAG"        15 t)
+                               ("IMAGES ID"  15 t)
+                               ("CREATED"    15 t)
+                               ("SIZE"       15 t)])
   (setq tabulated-list-sort-key (cons "CREATED" nil))
   (add-hook 'tabulated-list-revert-hook 'docker-images--refresh nil t))
+
+(defun docker-images-run ()
+  "Run the docker image at point"
+  (interactive)
+  (let ((image-id (aref (tabulated-list-get-entry) 2)))
+    (process-lines "docker" "run" "-d" image-id)))
 
 (defun docker-images--refresh ()
   "Run docker images again."
   (setq tabulated-list-entries nil)
   (dolist (line (cdr (process-lines "docker" "images")))
     (push (list nil (vconcat [] (split-string line "[[:blank:]]\\{2,\\}" t " ")))
-	  tabulated-list-entries))
+          tabulated-list-entries))
   (tabulated-list-init-header))
 
 (defun docker-images (&optional buffer)
