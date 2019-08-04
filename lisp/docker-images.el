@@ -22,20 +22,19 @@
 ;;; Commentary:
 
 ;;; Code:
+
+;; FIXME: Should be defvar
 (setq docker-images-mode-map
       (let ((map (make-sparse-keymap)))
+        (set-keymap-parent map tabulated-list-mode-map)
         (define-key map "r" 'docker-images-run)
         map))
 
-(define-derived-mode docker-images-mode tabulated-list-mode "Docker Images"
-  "Major mode for listing docker images."
-  (setq tabulated-list-format [("REPOSITORY" 15 t)
-                               ("TAG"        15 t)
-                               ("IMAGES ID"  15 t)
-                               ("CREATED"    15 t)
-                               ("SIZE"       15 t)])
-  (setq tabulated-list-sort-key (cons "CREATED" nil))
-  (add-hook 'tabulated-list-revert-hook 'docker-images--refresh nil t))
+(defconst docker-images--list-format [("REPOSITORY" 15 t)
+                                      ("TAG"        15 t)
+                                      ("IMAGES ID"  15 t)
+                                      ("CREATED"    15 t)
+                                      ("SIZE"       15 t)])
 
 (defun docker-images-run ()
   "Run the docker image at point"
@@ -62,8 +61,18 @@ of \"*Docker Images*\"."
     (docker-images-mode)
     (docker-images--refresh)
     (tabulated-list-print))
-  (display-buffer buffer)
+  (switch-to-buffer buffer)
   nil)
+
+(define-derived-mode docker-images-mode tabulated-list-mode "Docker Images"
+  "Major mode for listing docker images."
+  (kill-all-local-variables)
+  (setq mode-name "Docker Images")
+  (setq major-mode 'docker-images-mode)
+  (use-local-map docker-images-mode-map)
+  (setq tabulated-list-format docker-images--list-format)
+  (setq tabulated-list-sort-key (cons "CREATED" nil))
+  (add-hook 'tabulated-list-revert-hook 'docker-images--refresh nil t))
 
 (provide 'docker-images)
 
